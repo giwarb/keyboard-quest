@@ -19,11 +19,11 @@ body {
 .shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(360px, 1fr) minmax(340px, 560px);
+  grid-template-columns: minmax(360px, 1fr) minmax(390px, 620px);
   gap: 18px;
   padding: 18px;
   background:
-    radial-gradient(circle at 12% 8%, rgba(255, 209, 102, 0.18), transparent 22rem),
+    radial-gradient(circle at 12% 8%, rgba(255, 209, 102, 0.16), transparent 22rem),
     linear-gradient(135deg, #07172a, #12355e 58%, #0c213b);
 }
 
@@ -56,7 +56,7 @@ body {
   min-height: 56px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: rgba(7, 23, 42, 0.72);
+  background: rgba(7, 23, 42, 0.74);
   border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
@@ -78,11 +78,22 @@ body {
   left: 24px;
   right: 24px;
   bottom: 20px;
-  padding: 14px 18px 18px;
+  padding: 12px 18px 16px;
   border-radius: 8px;
-  background: rgba(7, 23, 42, 0.8);
+  background: rgba(7, 23, 42, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.18);
   text-align: center;
+}
+
+.word-panel.boss {
+  border-color: rgba(255, 107, 107, 0.72);
+  box-shadow: inset 0 0 0 2px rgba(255, 209, 102, 0.18);
+}
+
+.target-title {
+  color: #ffd166;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .kana {
@@ -107,6 +118,11 @@ body {
   color: #7ee081;
 }
 
+.roman b {
+  color: #ffca3a;
+  text-decoration: underline;
+}
+
 .hp {
   width: min(420px, 100%);
   height: 12px;
@@ -124,53 +140,85 @@ body {
 
 .trainer {
   display: grid;
-  grid-template-rows: auto 1fr;
-  gap: 14px;
+  grid-template-rows: auto auto 1fr;
+  gap: 12px;
   min-height: 560px;
 }
 
-.next-key {
+.trainer-word {
   display: grid;
-  grid-template-columns: auto 132px 1fr;
-  align-items: center;
-  gap: 12px;
+  grid-template-columns: 1fr 1.35fr 1fr;
+  gap: 10px;
+}
+
+.mini-card {
   min-height: 92px;
-  padding: 14px;
+  display: grid;
+  place-items: center;
+  padding: 10px;
   border-radius: 8px;
   background: #f5fbff;
   color: #10284a;
   box-shadow: inset 0 -4px 0 rgba(16, 40, 74, 0.12);
 }
 
-.next-key span {
-  font-weight: 800;
-  color: #4f6f8e;
+.mini-card.current {
+  grid-template-rows: auto 1fr auto;
+  border: 2px solid #bfe4ff;
 }
 
-.next-key strong {
-  display: grid;
-  place-items: center;
-  width: 132px;
-  height: 64px;
-  border-radius: 8px;
-  background: #fff;
-  color: #163b66;
+.mini-card.muted {
+  opacity: 0.55;
   font-size: 34px;
-  box-shadow: 0 4px 0 #d9e9f5;
+  font-weight: 900;
 }
 
-.next-key em {
-  font-style: normal;
-  font-size: 22px;
+.mini-card span {
+  color: #57718b;
+  font-size: 14px;
   font-weight: 900;
+}
+
+.mini-card strong {
+  font-size: 42px;
+}
+
+.mini-card em {
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.practice-strip {
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #10284a;
+  text-align: center;
+  border: 1px solid #d7e6f2;
+}
+
+.practice-strip .kana {
+  font-size: 24px;
+}
+
+.practice-strip .roman {
+  margin-top: 2px;
+  font-size: 30px;
+}
+
+.practice-strip small {
+  display: block;
+  color: #5c738a;
+  font-weight: 800;
 }
 
 .keyboard-stage {
   position: relative;
-  min-height: 452px;
+  min-height: 390px;
   display: grid;
   align-content: end;
-  padding: 18px 10px 20px;
+  padding: 96px 10px 20px;
   border-radius: 8px;
   background: #fff8e8;
   overflow: hidden;
@@ -178,37 +226,44 @@ body {
 
 .hands {
   position: absolute;
-  inset: auto 0 0;
+  inset: 12px 0 auto;
   width: 100%;
-  height: 78%;
+  height: 77%;
   pointer-events: none;
   z-index: 2;
 }
 
 .hand {
-  fill: rgba(255, 244, 207, 0.54);
+  fill: rgba(255, 244, 207, 0.5);
   stroke: #efa65f;
   stroke-width: 5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.finger {
-  opacity: 0;
-  fill: rgba(255, 107, 107, 0.32);
-  stroke: #ff4d4d;
+.tip {
+  opacity: 0.34;
   stroke-width: 5;
+  fill: #ffffff;
 }
 
-.hands.left .finger.left,
-.hands.right .finger.right,
-.hands.thumb .finger.thumb {
+.active-left-pinky .left-pinky,
+.active-left-ring .left-ring,
+.active-left-middle .left-middle,
+.active-left-index .left-index,
+.active-right-index .right-index,
+.active-right-middle .right-middle,
+.active-right-ring .right-ring,
+.active-right-pinky .right-pinky,
+.active-thumb .thumb {
   opacity: 1;
+  fill: #fff09c;
+  stroke: #ff4d4d;
 }
 
 .keyboard {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   display: grid;
   gap: 8px;
   width: 100%;
@@ -221,35 +276,77 @@ body {
 }
 
 .key {
-  width: clamp(28px, 5.1vw, 48px);
-  height: 42px;
+  width: clamp(32px, 5vw, 52px);
+  height: 48px;
   display: grid;
+  grid-template-rows: 17px 1fr;
   place-items: center;
   border-radius: 6px;
-  background: #ffffff;
-  border: 1px solid #d9e3ec;
-  box-shadow: 0 4px 0 #c8d4df;
-  color: #53687a;
-  font-size: 15px;
+  border: 2px solid rgba(16, 40, 74, 0.1);
+  box-shadow: 0 4px 0 rgba(52, 76, 98, 0.28);
+  color: #173653;
   font-weight: 900;
+}
+
+.key-kana {
+  font-size: 11px;
+  line-height: 1;
+  color: rgba(16, 40, 74, 0.64);
+}
+
+.key strong {
+  font-size: 16px;
+}
+
+.key.home {
+  box-shadow: 0 4px 0 rgba(52, 76, 98, 0.28), inset 0 -4px 0 rgba(255, 255, 255, 0.65);
 }
 
 .key.space {
   width: min(300px, 72%);
+  grid-template-rows: 15px 1fr;
 }
 
 .key.target {
-  background: #fff09c;
   color: #10284a;
-  border-color: #ffcb47;
-  box-shadow: 0 4px 0 #ef9f31;
-  transform: translateY(-2px);
+  border-color: #ff6b6b;
+  box-shadow: 0 4px 0 #ef9f31, 0 0 0 5px rgba(255, 107, 107, 0.2);
+  transform: translateY(-3px);
 }
 
 .key.wrong {
   background: #ffb3b3;
   color: #842727;
   border-color: #ff6b6b;
+}
+
+.finger-left-pinky { background: #ffd6e7; }
+.finger-left-ring { background: #f0d4ff; }
+.finger-left-middle { background: #d6e4ff; }
+.finger-left-index { background: #d7f8df; }
+.finger-right-index { background: #fff0a8; }
+.finger-right-middle { background: #ffd9b3; }
+.finger-right-ring { background: #d9f7ff; }
+.finger-right-pinky { background: #e6e6e6; }
+.finger-thumb { background: #ffe58a; }
+
+.legend {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.legend span {
+  min-height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  color: #10284a;
+  font-size: 11px;
+  font-weight: 900;
 }
 
 .overlay {
@@ -260,7 +357,7 @@ body {
   padding: 24px;
   border-radius: 8px;
   text-align: center;
-  background: rgba(7, 23, 42, 0.88);
+  background: rgba(7, 23, 42, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
 }
@@ -318,22 +415,38 @@ body {
     font-size: 18px;
   }
 
-  .roman {
-    font-size: 28px;
+  .word-panel .roman,
+  .practice-strip .roman {
+    font-size: 26px;
   }
 
-  .next-key {
-    grid-template-columns: 1fr 104px;
+  .trainer-word {
+    grid-template-columns: 0.7fr 1.6fr 0.7fr;
   }
 
-  .next-key em {
-    grid-column: 1 / -1;
-    font-size: 18px;
+  .mini-card {
+    min-height: 78px;
   }
 
-  .next-key strong {
-    width: 104px;
-    height: 56px;
-    font-size: 28px;
+  .mini-card strong {
+    font-size: 32px;
+  }
+
+  .mini-card em {
+    font-size: 14px;
+  }
+
+  .keyboard-stage {
+    min-height: 372px;
+    padding-top: 88px;
+  }
+
+  .key {
+    width: clamp(32px, 8.7vw, 42px);
+    height: 46px;
+  }
+
+  .legend {
+    grid-template-columns: repeat(4, 1fr);
   }
 }

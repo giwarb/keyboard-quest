@@ -1,66 +1,108 @@
-export type Finger =
-  | "左小指"
-  | "左薬指"
-  | "左中指"
-  | "左人差し指"
-  | "右人差し指"
-  | "右中指"
-  | "右薬指"
-  | "右小指"
-  | "親指";
+export type FingerId =
+  | "left-pinky"
+  | "left-ring"
+  | "left-middle"
+  | "left-index"
+  | "right-index"
+  | "right-middle"
+  | "right-ring"
+  | "right-pinky"
+  | "thumb";
 
 export type KeyHint = {
   char: string;
   code: string;
   label: string;
-  finger: Finger;
-  hand: "left" | "right" | "thumb";
+  kana: string;
+  finger: string;
+  fingerId: FingerId;
+  home?: boolean;
+  x: number;
+  y: number;
 };
 
-const KEY_HINTS: Record<string, KeyHint> = {
-  a: { char: "a", code: "KeyA", label: "A", finger: "左小指", hand: "left" },
-  b: { char: "b", code: "KeyB", label: "B", finger: "左人差し指", hand: "left" },
-  c: { char: "c", code: "KeyC", label: "C", finger: "左中指", hand: "left" },
-  d: { char: "d", code: "KeyD", label: "D", finger: "左中指", hand: "left" },
-  e: { char: "e", code: "KeyE", label: "E", finger: "左中指", hand: "left" },
-  f: { char: "f", code: "KeyF", label: "F", finger: "左人差し指", hand: "left" },
-  g: { char: "g", code: "KeyG", label: "G", finger: "左人差し指", hand: "left" },
-  h: { char: "h", code: "KeyH", label: "H", finger: "右人差し指", hand: "right" },
-  i: { char: "i", code: "KeyI", label: "I", finger: "右中指", hand: "right" },
-  j: { char: "j", code: "KeyJ", label: "J", finger: "右人差し指", hand: "right" },
-  k: { char: "k", code: "KeyK", label: "K", finger: "右中指", hand: "right" },
-  l: { char: "l", code: "KeyL", label: "L", finger: "右薬指", hand: "right" },
-  m: { char: "m", code: "KeyM", label: "M", finger: "右人差し指", hand: "right" },
-  n: { char: "n", code: "KeyN", label: "N", finger: "右人差し指", hand: "right" },
-  o: { char: "o", code: "KeyO", label: "O", finger: "右薬指", hand: "right" },
-  p: { char: "p", code: "KeyP", label: "P", finger: "右小指", hand: "right" },
-  q: { char: "q", code: "KeyQ", label: "Q", finger: "左小指", hand: "left" },
-  r: { char: "r", code: "KeyR", label: "R", finger: "左人差し指", hand: "left" },
-  s: { char: "s", code: "KeyS", label: "S", finger: "左薬指", hand: "left" },
-  t: { char: "t", code: "KeyT", label: "T", finger: "左人差し指", hand: "left" },
-  u: { char: "u", code: "KeyU", label: "U", finger: "右人差し指", hand: "right" },
-  v: { char: "v", code: "KeyV", label: "V", finger: "左人差し指", hand: "left" },
-  w: { char: "w", code: "KeyW", label: "W", finger: "左薬指", hand: "left" },
-  x: { char: "x", code: "KeyX", label: "X", finger: "左薬指", hand: "left" },
-  y: { char: "y", code: "KeyY", label: "Y", finger: "右人差し指", hand: "right" },
-  z: { char: "z", code: "KeyZ", label: "Z", finger: "左小指", hand: "left" },
-  " ": { char: " ", code: "Space", label: "SPACE", finger: "親指", hand: "thumb" }
+const FINGER_LABELS: Record<FingerId, string> = {
+  "left-pinky": "左小指",
+  "left-ring": "左薬指",
+  "left-middle": "左中指",
+  "left-index": "左人差し指",
+  "right-index": "右人差し指",
+  "right-middle": "右中指",
+  "right-ring": "右薬指",
+  "right-pinky": "右小指",
+  thumb: "親指"
 };
 
-export const KEY_ROWS = [
-  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
-  ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
-  ["z", "x", "c", "v", "b", "n", "m"]
-];
+const rows = [
+  [
+    ["q", "た", "left-pinky"],
+    ["w", "て", "left-ring"],
+    ["e", "い", "left-middle"],
+    ["r", "す", "left-index"],
+    ["t", "か", "left-index"],
+    ["y", "ん", "right-index"],
+    ["u", "な", "right-index"],
+    ["i", "に", "right-middle"],
+    ["o", "ら", "right-ring"],
+    ["p", "せ", "right-pinky"]
+  ],
+  [
+    ["a", "ち", "left-pinky"],
+    ["s", "と", "left-ring"],
+    ["d", "し", "left-middle"],
+    ["f", "は", "left-index"],
+    ["g", "き", "left-index"],
+    ["h", "く", "right-index"],
+    ["j", "ま", "right-index"],
+    ["k", "の", "right-middle"],
+    ["l", "り", "right-ring"]
+  ],
+  [
+    ["z", "つ", "left-pinky"],
+    ["x", "さ", "left-ring"],
+    ["c", "そ", "left-middle"],
+    ["v", "ひ", "left-index"],
+    ["b", "こ", "left-index"],
+    ["n", "み", "right-index"],
+    ["m", "も", "right-index"]
+  ]
+] as const;
+
+export const KEY_ROWS: KeyHint[][] = rows.map((row, rowIndex) => {
+  const rowWidth = row.length;
+  const start = 50 - (rowWidth * 8.6) / 2 + 4.3;
+  return row.map(([char, kana, fingerId], columnIndex) => ({
+    char,
+    code: `Key${char.toUpperCase()}`,
+    label: char.toUpperCase(),
+    kana,
+    fingerId,
+    finger: FINGER_LABELS[fingerId],
+    home: ["a", "s", "d", "f", "j", "k", "l"].includes(char),
+    x: start + columnIndex * 8.6,
+    y: 60 + rowIndex * 12
+  }));
+});
+
+const SPACE_HINT: KeyHint = {
+  char: " ",
+  code: "Space",
+  label: "SPACE",
+  kana: "空白",
+  fingerId: "thumb",
+  finger: FINGER_LABELS.thumb,
+  x: 50,
+  y: 93
+};
+
+const KEY_HINTS = Object.fromEntries(KEY_ROWS.flat().map((key) => [key.char, key]));
 
 export function getKeyHint(char: string): KeyHint {
-  return KEY_HINTS[char.toLowerCase()] ?? {
-    char,
-    code: "",
-    label: char.toUpperCase(),
-    finger: "右小指",
-    hand: "right"
-  };
+  return char === " " ? SPACE_HINT : KEY_HINTS[char.toLowerCase()] ?? KEY_ROWS[1][8];
+}
+
+export function getSpaceHint(): KeyHint {
+  return SPACE_HINT;
 }
 
 export function normalizeTypedKey(key: string): string {

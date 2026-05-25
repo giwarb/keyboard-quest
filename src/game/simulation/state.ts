@@ -9,11 +9,13 @@ export type Target = {
   hp: number;
   maxHp: number;
   enemyKind: EnemyKind;
+  isBoss: boolean;
+  title: string;
   defeated: boolean;
 };
 
 export type TypingEvent =
-  | { type: "correct"; char: string; targetDefeated: boolean; damage: number }
+  | { type: "correct"; char: string; wordCompleted: boolean; targetDefeated: boolean; damage: number }
   | { type: "wrong"; expected: string; actual: string };
 
 export type GamePhase = "ready" | "running" | "ended";
@@ -93,13 +95,14 @@ export function handleTypedChar(state: GameState, typed: string, now: number): G
 
   const nextCombo = clocked.combo + 1;
   const nextProgress = clocked.target.progress + 1;
-  const damage = 1 + Math.floor(nextCombo / 12);
-  const nextHp = Math.max(0, clocked.target.hp - damage);
-  const wordDone = nextProgress >= clocked.target.word.roman.length;
-  const targetDefeated = wordDone || nextHp <= 0;
-  const scoreGain = 10 + Math.min(40, nextCombo * 2) + clocked.level * 3;
+  const wordCompleted = nextProgress >= clocked.target.word.roman.length;
+  const damage = wordCompleted ? 1 : 0;
+  const nextHp = wordCompleted ? Math.max(0, clocked.target.hp - damage) : clocked.target.hp;
+  const targetDefeated = wordCompleted && nextHp <= 0;
+  const scoreGain = 10 + Math.min(40, nextCombo * 2) + clocked.level * 3 + (wordCompleted ? 50 : 0);
   const defeated = clocked.defeated + (targetDefeated ? 1 : 0);
   const level = Math.min(5, 1 + Math.floor(defeated / 3) + Math.floor((now - clocked.startedAt) / 15_000));
+  const seed = clocked.seed + clocked.hits * 17 + defeated * 31;
 
   return {
     ...clocked,
@@ -110,9 +113,16 @@ export function handleTypedChar(state: GameState, typed: string, now: number): G
     defeated,
     level,
     target: targetDefeated
-      ? createTarget(defeated + 1, level, clocked.seed + defeated * 13)
-      : { ...clocked.target, progress: nextProgress, hp: nextHp },
-    lastEvent: { type: "correct", char: typed, targetDefeated, damage }
+      ? createTarget(defeated + 1, level, seed)
+      : wordCompleted
+        ? {
+            ...clocked.target,
+            word: pickWord(wordsForLevel(level), seed),
+            progress: 0,
+            hp: nextHp
+          }
+        : { ...clocked.target, progress: nextProgress },
+    lastEvent: { type: "correct", char: typed, wordCompleted, targetDefeated, damage }
   };
 }
 
@@ -130,16 +140,19 @@ export function rankForScore(score: number): string {
 }
 
 function createTarget(id: number, level: number, seed: number): Target {
+  const isBoss = id > 1 && id % 5 === 0;
   const options = wordsForLevel(level);
   const word = pickWord(options.length ? options : WORD_BANK, seed + id * 31);
-  const maxHp = Math.max(2, Math.ceil(word.roman.length / 2) + level);
+  const maxHp = isBoss ? Math.min(6, 3 + level) : 1;
   return {
     id,
     word,
     progress: 0,
     hp: maxHp,
     maxHp,
-    enemyKind: ENEMY_KINDS[(seed + id) % ENEMY_KINDS.length],
+    enemyKind: isBoss ? ENEMY_KINDS[(id / 5) % ENEMY_KINDS.length] : ENEMY_KINDS[(seed + id) % ENEMY_KINDS.length],
+    isBoss,
+    title: isBoss ? `ボス ${maxHp}問勝負` : "モンスター",
     defeated: false
   };
 }

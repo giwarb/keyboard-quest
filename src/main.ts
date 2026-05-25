@@ -60,6 +60,7 @@ window.addEventListener("keydown", (event) => {
   if (next !== state && next.lastEvent) {
     if (next.lastEvent.type === "correct") {
       audio.correct();
+      if (next.lastEvent.wordCompleted) audio.wordClear();
       if (next.lastEvent.targetDefeated) audio.defeat();
     } else {
       audio.wrong();
