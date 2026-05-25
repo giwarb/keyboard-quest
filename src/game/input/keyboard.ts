@@ -11,14 +11,13 @@ export type FingerId =
 
 export type KeyHint = {
   char: string;
-  code: string;
   label: string;
   kana: string;
   finger: string;
   fingerId: FingerId;
+  width?: number;
   home?: boolean;
-  x: number;
-  y: number;
+  active?: boolean;
 };
 
 const FINGER_LABELS: Record<FingerId, string> = {
@@ -33,76 +32,97 @@ const FINGER_LABELS: Record<FingerId, string> = {
   thumb: "親指"
 };
 
-const rows = [
-  [
-    ["q", "た", "left-pinky"],
-    ["w", "て", "left-ring"],
-    ["e", "い", "left-middle"],
-    ["r", "す", "left-index"],
-    ["t", "か", "left-index"],
-    ["y", "ん", "right-index"],
-    ["u", "な", "right-index"],
-    ["i", "に", "right-middle"],
-    ["o", "ら", "right-ring"],
-    ["p", "せ", "right-pinky"]
-  ],
-  [
-    ["a", "ち", "left-pinky"],
-    ["s", "と", "left-ring"],
-    ["d", "し", "left-middle"],
-    ["f", "は", "left-index"],
-    ["g", "き", "left-index"],
-    ["h", "く", "right-index"],
-    ["j", "ま", "right-index"],
-    ["k", "の", "right-middle"],
-    ["l", "り", "right-ring"]
-  ],
-  [
-    ["z", "つ", "left-pinky"],
-    ["x", "さ", "left-ring"],
-    ["c", "そ", "left-middle"],
-    ["v", "ひ", "left-index"],
-    ["b", "こ", "left-index"],
-    ["n", "み", "right-index"],
-    ["m", "も", "right-index"]
-  ]
-] as const;
+type KeySpec = [char: string, label: string, kana: string, finger: FingerId, width?: number];
 
-export const KEY_ROWS: KeyHint[][] = rows.map((row, rowIndex) => {
-  const rowWidth = row.length;
-  const start = 50 - (rowWidth * 8.6) / 2 + 4.3;
-  return row.map(([char, kana, fingerId], columnIndex) => ({
+const specs: KeySpec[][] = [
+  [
+    ["", "半/全", "", "left-pinky", 1.2],
+    ["1", "1", "ぬ", "left-pinky"],
+    ["2", "2", "ふ", "left-ring"],
+    ["3", "3", "あ", "left-middle"],
+    ["4", "4", "う", "left-index"],
+    ["5", "5", "え", "left-index"],
+    ["6", "6", "お", "right-index"],
+    ["7", "7", "や", "right-index"],
+    ["8", "8", "ゆ", "right-middle"],
+    ["9", "9", "よ", "right-ring"],
+    ["0", "0", "わ", "right-pinky"],
+    ["-", "-", "ほ", "right-pinky"],
+    ["^", "^", "へ", "right-pinky"],
+    ["¥", "¥", "ー", "right-pinky"]
+  ],
+  [
+    ["", "tab", "", "left-pinky", 1.5],
+    ["q", "Q", "た", "left-pinky"],
+    ["w", "W", "て", "left-ring"],
+    ["e", "E", "い", "left-middle"],
+    ["r", "R", "す", "left-index"],
+    ["t", "T", "か", "left-index"],
+    ["y", "Y", "ん", "right-index"],
+    ["u", "U", "な", "right-index"],
+    ["i", "I", "に", "right-middle"],
+    ["o", "O", "ら", "right-ring"],
+    ["p", "P", "せ", "right-pinky"],
+    ["@", "@", "゛", "right-pinky"],
+    ["[", "[", "゜", "right-pinky"]
+  ],
+  [
+    ["", "caps", "", "left-pinky", 1.8],
+    ["a", "A", "ち", "left-pinky"],
+    ["s", "S", "と", "left-ring"],
+    ["d", "D", "し", "left-middle"],
+    ["f", "F", "は", "left-index"],
+    ["g", "G", "き", "left-index"],
+    ["h", "H", "く", "right-index"],
+    ["j", "J", "ま", "right-index"],
+    ["k", "K", "の", "right-middle"],
+    ["l", "L", "り", "right-ring"],
+    [";", ";", "れ", "right-pinky"],
+    ["]", "]", "む", "right-pinky"]
+  ],
+  [
+    ["", "shift", "", "left-pinky", 2.2],
+    ["z", "Z", "つ", "left-pinky"],
+    ["x", "X", "さ", "left-ring"],
+    ["c", "C", "そ", "left-middle"],
+    ["v", "V", "ひ", "left-index"],
+    ["b", "B", "こ", "left-index"],
+    ["n", "N", "み", "right-index"],
+    ["m", "M", "も", "right-index"],
+    [",", ",", "ね", "right-middle"],
+    [".", ".", "る", "right-ring"],
+    ["/", "/", "め", "right-pinky"],
+    ["", "shift", "", "right-pinky", 2.0]
+  ],
+  [
+    ["", "ctrl", "", "left-pinky", 1.3],
+    ["", "Fn", "", "left-ring", 1.1],
+    ["", "win", "", "left-middle", 1.1],
+    ["", "alt", "", "left-index", 1.1],
+    [" ", "SPACE", "空白", "thumb", 6.8],
+    ["", "alt", "", "right-index", 1.1],
+    ["", "Fn", "", "right-middle", 1.1],
+    ["", "ctrl", "", "right-pinky", 1.3]
+  ]
+];
+
+export const KEY_ROWS: KeyHint[][] = specs.map((row) =>
+  row.map(([char, label, kana, fingerId, width]) => ({
     char,
-    code: `Key${char.toUpperCase()}`,
-    label: char.toUpperCase(),
+    label,
     kana,
     fingerId,
     finger: FINGER_LABELS[fingerId],
-    home: ["a", "s", "d", "f", "j", "k", "l"].includes(char),
-    x: start + columnIndex * 8.6,
-    y: 60 + rowIndex * 12
-  }));
-});
+    width,
+    active: Boolean(char),
+    home: ["a", "s", "d", "f", "j", "k", "l"].includes(char)
+  }))
+);
 
-const SPACE_HINT: KeyHint = {
-  char: " ",
-  code: "Space",
-  label: "SPACE",
-  kana: "空白",
-  fingerId: "thumb",
-  finger: FINGER_LABELS.thumb,
-  x: 50,
-  y: 93
-};
-
-const KEY_HINTS = Object.fromEntries(KEY_ROWS.flat().map((key) => [key.char, key]));
+const KEY_HINTS = Object.fromEntries(KEY_ROWS.flat().filter((key) => key.char).map((key) => [key.char, key]));
 
 export function getKeyHint(char: string): KeyHint {
-  return char === " " ? SPACE_HINT : KEY_HINTS[char.toLowerCase()] ?? KEY_ROWS[1][8];
-}
-
-export function getSpaceHint(): KeyHint {
-  return SPACE_HINT;
+  return KEY_HINTS[char.toLowerCase()] ?? KEY_HINTS.k;
 }
 
 export function normalizeTypedKey(key: string): string {
