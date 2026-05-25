@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.vite/
+coverage/
+*.local
+playtest-*.png
+vite-preview*.log
